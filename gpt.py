@@ -12,7 +12,7 @@ def beautify_text(text):
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": text}
         ],
-        temperature=0.4,
+        temperature=0.3,
         max_tokens=1024,
     )
     return response.choices[0].message.content.strip()
