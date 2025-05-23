@@ -1,4 +1,3 @@
-# main.py
 import logging
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
@@ -12,13 +11,20 @@ logging.basicConfig(level=logging.INFO)
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.message
 
-    # 1. Если аудио/voice
     if message.voice:
         file = await message.voice.get_file()
         audio_path = f"voice_{message.message_id}.ogg"
         await file.download_to_drive(audio_path)
+        # Проверка, скачался ли файл и его размер
+        if os.path.exists(audio_path):
+            logging.info(f"[AUDIO] Файл скачан: {audio_path}, размер {os.path.getsize(audio_path)} байт")
+        else:
+            logging.error(f"[AUDIO] Файл {audio_path} не скачался")
+            await message.reply_text("Ошибка загрузки аудиофайла.")
+            return
         try:
             text = audio_to_text(audio_path)
+            logging.info(f"[AUDIO] Whisper распознал: '{text}'")
         except Exception as e:
             await message.reply_text("Ошибка распознавания аудио.")
             logging.error(e)
@@ -27,12 +33,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         os.remove(audio_path)
     elif message.text:
         text = message.text
+        logging.info(f"[TEXT] Получен текст: '{text}'")
     else:
         await message.reply_text("Пришли голосовое или текстовое сообщение!")
         return
 
+    # Логируем, что отправляем в GPT
+    logging.info(f"[GPT] Отправляем текст: '{text}'")
     try:
         beautified = beautify_text(text)
+        logging.info(f"[GPT] Получен ответ: '{beautified}'")
     except Exception as e:
         await message.reply_text("Ошибка обработки через GPT.")
         logging.error(e)
