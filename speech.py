@@ -1,6 +1,6 @@
-# speech.py
 from cfg import OPENAI_API_KEY
 import requests
+import logging
 
 def audio_to_text(audio_path, language="ru"):
     url = "https://api.openai.com/v1/audio/transcriptions"
@@ -13,5 +13,11 @@ def audio_to_text(audio_path, language="ru"):
         "language": (None, language)
     }
     response = requests.post(url, headers=headers, files=files)
-    response.raise_for_status()
-    return response.json()["text"]
+    try:
+        response.raise_for_status()
+        data = response.json()
+        logging.info(f"[Whisper] Ответ: {data}")
+        return data["text"]
+    except Exception as e:
+        logging.error(f"[Whisper] Ошибка: {response.text}")
+        raise e
