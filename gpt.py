@@ -17,7 +17,7 @@ def beautify_text(text):
         f"Приведи в порядок этот текст, сделай его грамотным, плавным и естественным, убери лишние слова и мусор, но оставь мою интонацию и стиль. Текст: {text}"
     )
     response = client.chat.completions.create(
-        model="gpt-4o",  # gpt-4o-mini — нет, нужно просто gpt-4o
+        model="gpt-4o-mini",  # gpt-4o-mini — нет, нужно просто gpt-4o
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
